@@ -10,7 +10,9 @@ import http from "node:http";
 import { WebSocketServer } from "ws";
 import { randomUUID } from "node:crypto";
 
-const DEFAULT_HOST = "127.0.0.1";
+// Omit / use "::" so Windows `localhost` (often ::1) and 127.0.0.1 both work.
+// Binding only 127.0.0.1 makes plugin `ws://localhost:3851` flaky (IPv6 first).
+const DEFAULT_HOST = process.env.FIGMA_MCP_HOST || "::";
 const DEFAULT_PORT = Number(process.env.FIGMA_MCP_PORT || 3851);
 const EXEC_TIMEOUT_MS = Number(process.env.FIGMA_MCP_EXEC_TIMEOUT_MS || 30000);
 
@@ -113,10 +115,19 @@ export function exec(code) {
   });
 }
 
+function publicBridgeBase() {
+  // Prefer localhost in status strings (matches Figma manifest allowlist).
+  const host = listenInfo.host === "::" || listenInfo.host === "0.0.0.0"
+    ? "localhost"
+    : listenInfo.host;
+  return `http://${host}:${listenInfo.port}`;
+}
+
 export function health() {
   return {
     ok: true,
-    bridge: `http://${listenInfo.host}:${listenInfo.port}`,
+    bridge: publicBridgeBase(),
+    bind: `${listenInfo.host}:${listenInfo.port}`,
     pluginConnected: pluginConnected(),
     pendingJobs: pending.size,
     pid: process.pid,
@@ -206,9 +217,14 @@ export function startBridge(port = DEFAULT_PORT, host = DEFAULT_HOST) {
 
   return new Promise((resolve, reject) => {
     server.once("error", reject);
-    server.listen(port, host, () => {
+    // ipv6Only:false → :: also accepts IPv4-mapped (127.0.0.1) on most platforms
+    const listenOpts =
+      host === "::"
+        ? { port, host: "::", ipv6Only: false }
+        : { port, host };
+    server.listen(listenOpts, () => {
       console.error(
-        `[figma-meta-mcp] bridge listening on http://${host}:${port} (ws /plugin)`
+        `[figma-meta-mcp] bridge listening on ${publicBridgeBase()} (bind ${host}:${port}, ws /plugin)`
       );
       resolve(listenInfo);
     });
@@ -216,5 +232,5 @@ export function startBridge(port = DEFAULT_PORT, host = DEFAULT_HOST) {
 }
 
 export function getBridgeUrl() {
-  return `http://${listenInfo.host}:${listenInfo.port}`;
+  return publicBridgeBase();
 }

@@ -3,7 +3,7 @@
  */
 
 export const FIGMA_BRIDGE =
-  process.env.FIGMA_MCP_BRIDGE || "http://127.0.0.1:3851";
+  process.env.FIGMA_MCP_BRIDGE || "http://localhost:3851";
 
 export function bridgeUnreachableHint(err) {
   return [

@@ -10,7 +10,8 @@ import { registerTools, getBridgeUrl } from "./core.mjs";
 
 async function main() {
   const port = Number(process.env.FIGMA_MCP_PORT || 3851);
-  const host = process.env.FIGMA_MCP_HOST || "127.0.0.1";
+  // Default "::" — dual-stack; avoids Windows localhost→::1 vs 127.0.0.1 mismatch.
+  const host = process.env.FIGMA_MCP_HOST || "::";
   await startBridge(port, host);
 
   const server = new McpServer({
