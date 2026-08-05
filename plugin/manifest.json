@@ -8,11 +8,9 @@
   "documentAccess": "dynamic-page",
   "networkAccess": {
     "allowedDomains": ["none"],
-    "reasoning": "Connects only to the local figma-meta-mcp bridge on 127.0.0.1 so Cursor can run figma_exec against the open document.",
+    "reasoning": "Development plugin talks only to local figma-meta-mcp bridge (localhost) for Cursor figma_exec.",
     "devAllowedDomains": [
-      "http://127.0.0.1:3851",
       "http://localhost:3851",
-      "ws://127.0.0.1:3851",
       "ws://localhost:3851"
     ]
   }

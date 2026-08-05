@@ -34,8 +34,9 @@
       <code>figma_exec</code> / <code>figma_selection_info</code>.
     </p>
     <script>
-      const BRIDGE_HTTP = "http://127.0.0.1:3851";
-      const BRIDGE_WS = "ws://127.0.0.1:3851/plugin";
+      // Figma manifest only allows localhost (not 127.0.0.1) in devAllowedDomains
+      const BRIDGE_HTTP = "http://localhost:3851";
+      const BRIDGE_WS = "ws://localhost:3851/plugin";
       const statusEl = document.getElementById("status");
       let socket = null;
       let retries = 0;
