@@ -118,7 +118,8 @@ examples/ cursor-mcp.json
 | Variable | Default | Meaning |
 |----------|---------|---------|
 | `FIGMA_MCP_PORT` | `3851` | Bridge listen port |
-| `FIGMA_MCP_HOST` | `::` | Bridge bind host (`::` = dual-stack so Windows `localhost` works) |
+| `FIGMA_MCP_HOST` | _(unset)_ | Default: bind **loopback only** (`127.0.0.1` + `::1`). Set only to override. |
+| `FIGMA_MCP_CORS_ORIGINS` | Figma + `null` + localhost | Comma-separated Origin allowlist (not `*`) |
 | `FIGMA_MCP_EXEC_TIMEOUT_MS` | `30000` | Per-job timeout |
 
 ## Not in scope (yet)
