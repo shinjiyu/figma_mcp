@@ -1,0 +1,33 @@
+{
+  "name": "figma-meta-mcp",
+  "version": "0.1.0",
+  "description": "Lightweight Figma MCP: run Plugin API JS in a running Figma via figma_exec (ae-meta-mcp / cocosmcp_exec style).",
+  "type": "module",
+  "main": "./mcp/index.mjs",
+  "bin": {
+    "figma-meta-mcp": "./mcp/index.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node ./mcp/index.mjs",
+    "setup:cursor": "node ./scripts/setup-cursor.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "figma",
+    "cursor",
+    "plugin"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shinjiyu/figma_mcp.git"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "ws": "^8.18.0",
+    "zod": "^3.24.2"
+  }
+}

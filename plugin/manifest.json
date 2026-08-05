@@ -1,0 +1,19 @@
+{
+  "name": "figma-meta-mcp",
+  "id": "figma-meta-mcp-local-dev",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma", "figjam"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"],
+    "reasoning": "Connects only to the local figma-meta-mcp bridge on 127.0.0.1 so Cursor can run figma_exec against the open document.",
+    "devAllowedDomains": [
+      "http://127.0.0.1:3851",
+      "http://localhost:3851",
+      "ws://127.0.0.1:3851",
+      "ws://localhost:3851"
+    ]
+  }
+}

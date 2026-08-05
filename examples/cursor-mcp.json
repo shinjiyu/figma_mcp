@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "figma-meta-mcp": {
+      "command": "node",
+      "args": ["D:/workspace/figma_mcp/mcp/index.mjs"],
+      "env": {
+        "FIGMA_MCP_PORT": "3851"
+      }
+    }
+  }
+}

@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>figma-meta-mcp</title>
+    <style>
+      body {
+        font: 12px/1.4 Inter, system-ui, sans-serif;
+        margin: 12px;
+        color: var(--figma-color-text, #333);
+        background: var(--figma-color-bg, #fff);
+      }
+      #status {
+        padding: 8px 10px;
+        border-radius: 6px;
+        background: var(--figma-color-bg-secondary, #f2f2f2);
+        word-break: break-all;
+      }
+      .ok {
+        color: #0a7;
+      }
+      .bad {
+        color: #c33;
+      }
+      code {
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="status">Connecting to bridge…</div>
+    <p style="margin-top: 10px; opacity: 0.75">
+      Keep this panel open while Cursor uses
+      <code>figma_exec</code> / <code>figma_selection_info</code>.
+    </p>
+    <script>
+      const BRIDGE_HTTP = "http://127.0.0.1:3851";
+      const BRIDGE_WS = "ws://127.0.0.1:3851/plugin";
+      const statusEl = document.getElementById("status");
+      let socket = null;
+      let retries = 0;
+
+      function setStatus(text, ok) {
+        statusEl.textContent = text;
+        statusEl.className = ok ? "ok" : "bad";
+      }
+
+      function connect() {
+        try {
+          socket = new WebSocket(BRIDGE_WS);
+        } catch (err) {
+          setStatus("WebSocket create failed: " + err, false);
+          scheduleReconnect();
+          return;
+        }
+
+        socket.addEventListener("open", () => {
+          retries = 0;
+          setStatus("Connected to " + BRIDGE_WS, true);
+          socket.send(JSON.stringify({ type: "hello", from: "figma-plugin" }));
+        });
+
+        socket.addEventListener("message", (ev) => {
+          let msg;
+          try {
+            msg = JSON.parse(ev.data);
+          } catch (_) {
+            return;
+          }
+          if (msg.type === "exec") {
+            parent.postMessage({ pluginMessage: { type: "exec", id: msg.id, code: msg.code } }, "*");
+          } else if (msg.type === "welcome") {
+            setStatus("Connected · plugin channel ready", true);
+          }
+        });
+
+        socket.addEventListener("close", () => {
+          setStatus("Disconnected · retrying… (is MCP running?)", false);
+          scheduleReconnect();
+        });
+
+        socket.addEventListener("error", () => {
+          setStatus("Bridge error · is figma-meta-mcp MCP started?", false);
+        });
+      }
+
+      function scheduleReconnect() {
+        retries += 1;
+        const delay = Math.min(5000, 400 * retries);
+        setTimeout(connect, delay);
+      }
+
+      window.onmessage = (event) => {
+        const msg = event.data && event.data.pluginMessage;
+        if (!msg || msg.type !== "result") return;
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify(msg));
+        }
+      };
+
+      // Optional HTTP health probe for clearer first-run errors
+      fetch(BRIDGE_HTTP + "/health")
+        .then((r) => r.json())
+        .then((j) => {
+          if (!j || !j.ok) setStatus("Bridge /health unexpected: " + JSON.stringify(j), false);
+        })
+        .catch(() => {
+          setStatus(
+            "Cannot reach " + BRIDGE_HTTP + " — start Cursor MCP figma-meta-mcp first",
+            false
+          );
+        })
+        .finally(connect);
+    </script>
+  </body>
+</html>
